@@ -136,8 +136,12 @@ export class IntroController {
       }
     };
 
+    const initialStep: 'login' | 'payment' | 'instructions' = !PAYWALL
+      ? 'instructions'
+      : (loginResponse ? 'payment' : 'login');
+
     this.introUI.show(options, {
-      currentStep: loginResponse ? 'payment' : 'login',
+      currentStep: initialStep,
       loginState: { email: '', isVerified: false, otpSent: false, isLoading: false },
       paymentState: { isProcessing: false },
       instructionsState: { playerName: '', selectedVehicle: this.selectedVehicle }
