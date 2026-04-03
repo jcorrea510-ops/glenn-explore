@@ -109,13 +109,23 @@ async function setupScene() {
       teleportWrapper
     );
   } else {
-    // User is not authenticated, show login screen
+    // User is not authenticated, sign in anonymously and skip email gating
+    const guestAuth = await authClient.signInAnonymously();
+
+    PlayerStore.setPlayerName(guestAuth.username);
+    PlayerStore.setIsGuest(guestAuth.isGuest);
+    PlayerStore.setPlayerId(guestAuth.playerId);
+
+    if (guestAuth.lastPosition) {
+      PlayerStore.setCoordinates([guestAuth.lastPosition.x, guestAuth.lastPosition.y, guestAuth.lastPosition.z]);
+    }
+
     const introController = new IntroController(authClient, (name: string) => {
       // Fire and forget name change
       realtimeController.changePlayerName(name);
     });
-    await introController.showIntro(authResult, (initialPosition: [number, number]) => {
-      // After authentication is successful, initialize the game
+
+    await introController.showIntro(guestAuth, (initialPosition: [number, number]) => {
       initializeGame(player, initialPosition, realtimeController, teleportWrapper);
     });
   }
